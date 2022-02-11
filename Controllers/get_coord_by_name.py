@@ -6,8 +6,7 @@ def get_coord(name):
     request_to_get_coord = f"http://geocode-maps.yandex.ru/1.x/?apikey={API_KEY}&geocode={name}&format=json"
     coord_respone = requests.get(request_to_get_coord)
     json_coord_respone = coord_respone.json()
-    answ = json_coord_respone["response"]["GeoObjectCollection"]["featureMember"]\
-        [0]["GeoObject"]["boundedBy"]["Envelope"]["lowerCorner"]
+    answ = json_coord_respone["response"]["GeoObjectCollection"]["featureMember"] \
+        [0]["GeoObject"]["Point"]["pos"]
+    print(answ.split())
     return tuple(answ.split())
-
-print(get_coord('карамзина 38 88'))
