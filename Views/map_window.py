@@ -5,7 +5,7 @@ from PyQt5.uic.properties import QtGui
 from PyQt5.QtCore import Qt
 
 from Controllers.mapapi_PG import show_map
-from Models.Variables import coord
+from Models.Variables import coord, spn
 
 
 class MapWindow(QMainWindow):
@@ -14,15 +14,15 @@ class MapWindow(QMainWindow):
         self.width = 600
         self.height = 600
 
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1027, 634)
+    def setupUi(self):
+        self.setObjectName("MainWindow")
+        self.resize(1027, 634)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
-        MainWindow.setSizePolicy(sizePolicy)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
+        self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
 
         self.map_image = QtWidgets.QLabel(self.centralwidget)
@@ -43,17 +43,17 @@ class MapWindow(QMainWindow):
         self.sat_button.setGeometry(QtCore.QRect(740, 40, 113, 32))
         self.sat_button.setObjectName("sat_button")
 
-        # self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        # self.lineEdit.setGeometry(QtCore.QRect(740, 110, 271, 31))
-        # self.lineEdit.setObjectName("lineEdit")
+        self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEdit.setGeometry(QtCore.QRect(740, 110, 271, 31))
+        self.lineEdit.setObjectName("lineEdit")
 
         self.clear_button = QtWidgets.QPushButton(self.centralwidget)
         self.clear_button.setGeometry(QtCore.QRect(740, 150, 131, 61))
         self.clear_button.setObjectName("clear_button")
 
-        # self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
-        # self.textEdit.setGeometry(QtCore.QRect(740, 230, 221, 111))
-        # self.textEdit.setObjectName("textEdit")
+        self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
+        self.textEdit.setGeometry(QtCore.QRect(740, 230, 221, 111))
+        self.textEdit.setObjectName("textEdit")
 
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(740, 210, 221, 20))
@@ -71,13 +71,13 @@ class MapWindow(QMainWindow):
         self.find_button.setGeometry(QtCore.QRect(890, 150, 131, 61))
         self.find_button.setObjectName("find_button")
 
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.setCentralWidget(self.centralwidget)
+        self.statusbar = QtWidgets.QStatusBar(self)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        self.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(self)
+        QtCore.QMetaObject.connectSlotsByName(self)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -91,29 +91,38 @@ class MapWindow(QMainWindow):
         self.checkBox.setText(_translate("MainWindow", "Да"))
         self.find_button.setText(_translate("MainWindow", "Поиск объекта"))
 
-    # def keyPressEvent(self, event):
-    #     if event.key() == Qt.Key_Left:
-    #         coord[0] = coord[0] - 0.5
-    #         self.map_image.setPixmap(QPixmap.fromImage(show_map()))
-    #         print("Click Left")
-    #
-    #     if event.key() == Qt.Key_Right:
-    #         pass
-    #
-    #     if event.key() == Qt.Key_Up:
-    #         pass
-    #
-    #     if event.key() == Qt.Key_Down:
-    #         pass
-    #
-    # def keyPressEvent(self, event: QKeyEvent):
-    #     if event.key() == Qt.Key_F:
-    #         print("F")
+    def mousePressEvent(self, event):
+        if self.lineEdit.hasFocus():
+            self.lineEdit.clearFocus()
 
-    def keyPressEvent(self, event: QKeyEvent):
-        super().keyPressEvent(event)
-        if event.key() == Qt.Key_F:
-            print(123456)
+        if self.textEdit.hasFocus():
+            self.textEdit.clearFocus()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Left:
+            coord[0] = str(float(coord[0]) - 0.001)
+            self.map_image.setPixmap(QPixmap.fromImage(show_map()))
+
+        if event.key() == Qt.Key_Right:
+            coord[0] = str(float(coord[0]) + 0.001)
+            self.map_image.setPixmap(QPixmap.fromImage(show_map()))
+
+        if event.key() == Qt.Key_Up:
+            coord[1] = str(float(coord[1]) + 0.001)
+            self.map_image.setPixmap(QPixmap.fromImage(show_map()))
+
+        if event.key() == Qt.Key_Down:
+            coord[1] = str(float(coord[1]) - 0.001)
+            self.map_image.setPixmap(QPixmap.fromImage(show_map()))
+
+        if event.key() == Qt.Key_PageUp:
+            if 0 < spn[0] - 0.001 < 0.1:
+                spn[0] -= 0.001
+
+        if event.key() == Qt.Key_PageDown:
+            if spn[0] + 0.003 < 0.05100000000000001:
+                spn[0] += 0.003
+
 
 if __name__ == "__main__":
     import sys
@@ -121,7 +130,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     Form = QtWidgets.QMainWindow()
     ui = MapWindow()
-    ui.setupUi(Form)
+    ui.setupUi()
 
-    Form.show()
+    ui.show()
     sys.exit(app.exec_())
