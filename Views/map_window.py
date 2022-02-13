@@ -1,18 +1,25 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QPixmap, QKeyEvent
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.uic.properties import QtGui
+from io import BytesIO
+from PIL import ImageQt, Image
+from Controllers.get_map_img import get_map_image
 from PyQt5.QtCore import Qt
-
+import sys
+from Controllers.get_coord_by_name import get_coord
+from PyQt5 import QtCore, QtMultimedia
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
 from Controllers.mapapi_PG import show_map
 from Models.Variables import coord, spn
-
+globality_mode = 'map'
+all_pt = []
+pt_query = ''
 
 class MapWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.width = 600
         self.height = 600
+        self.btn = None
 
     def setupUi(self):
         self.setObjectName("MainWindow")
@@ -34,14 +41,17 @@ class MapWindow(QMainWindow):
         self.map_Button = QtWidgets.QPushButton(self.centralwidget)
         self.map_Button.setGeometry(QtCore.QRect(740, 10, 113, 32))
         self.map_Button.setObjectName("map_Button")
+        self.map_Button.clicked.connect(lambda: self.change_mode('map'))
 
         self.hybrid_button = QtWidgets.QPushButton(self.centralwidget)
         self.hybrid_button.setGeometry(QtCore.QRect(740, 70, 113, 32))
         self.hybrid_button.setObjectName("hybrid_button")
+        self.hybrid_button.clicked.connect(lambda: self.change_mode('sat,skl'))
 
         self.sat_button = QtWidgets.QPushButton(self.centralwidget)
         self.sat_button.setGeometry(QtCore.QRect(740, 40, 113, 32))
         self.sat_button.setObjectName("sat_button")
+        self.sat_button.clicked.connect(lambda: self.change_mode('sat'))
 
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit.setGeometry(QtCore.QRect(740, 110, 271, 31))
@@ -70,6 +80,7 @@ class MapWindow(QMainWindow):
         self.find_button = QtWidgets.QPushButton(self.centralwidget)
         self.find_button.setGeometry(QtCore.QRect(890, 150, 131, 61))
         self.find_button.setObjectName("find_button")
+        self.find_button.clicked.connect(lambda: self.find_obj(self.lineEdit.text()))
 
         self.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(self)
@@ -78,6 +89,33 @@ class MapWindow(QMainWindow):
 
         self.retranslateUi(self)
         QtCore.QMetaObject.connectSlotsByName(self)
+
+    def find_obj(self, name):
+        global coord, all_pt
+        coord = get_coord(name)
+        if coord not in all_pt:
+            all_pt.append(coord)
+        self.add_pt()
+        self.update_map()
+
+    def add_pt(self):
+        global pt_query, all_pt
+        temp = []
+        for i in all_pt:
+            temp.append(f'{i[0]},{i[1]}')
+        pt_query = '~'.join(temp)
+
+        # for index, i in enumerate(all_pt):
+        #     if index == 0:
+        #         pt_query += f"{','.join(i)}"
+        #     else:
+        #         pt_query += f"~{','.join(i)}"
+        # print(all_pt)
+
+    def change_mode(self, mode):
+        global globality_mode
+        globality_mode = mode
+        self.update_map()
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -98,34 +136,40 @@ class MapWindow(QMainWindow):
         if self.textEdit.hasFocus():
             self.textEdit.clearFocus()
 
+    def update_map(self):
+        print(pt_query)
+        self.map_image.setPixmap(QPixmap.fromImage(ImageQt.ImageQt(Image.open(BytesIO(
+            get_map_image(f'l={globality_mode}', f'll={coord[0]},{coord[1]}', f'spn={spn[0]},{spn[0]}', f'pt={pt_query}'))))))
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Left:
             coord[0] = str(float(coord[0]) - 0.001)
-            self.map_image.setPixmap(QPixmap.fromImage(show_map()))
+            self.update_map()
 
         if event.key() == Qt.Key_Right:
             coord[0] = str(float(coord[0]) + 0.001)
-            self.map_image.setPixmap(QPixmap.fromImage(show_map()))
+            self.update_map()
 
         if event.key() == Qt.Key_Up:
             coord[1] = str(float(coord[1]) + 0.001)
-            self.map_image.setPixmap(QPixmap.fromImage(show_map()))
+            self.update_map()
 
         if event.key() == Qt.Key_Down:
             coord[1] = str(float(coord[1]) - 0.001)
-            self.map_image.setPixmap(QPixmap.fromImage(show_map()))
+            self.update_map()
 
         if event.key() == Qt.Key_PageUp:
             if 0 < spn[0] - 0.001 < 0.1:
-                spn[0] -= 0.001
+                spn[0] -= 0.002
+            self.update_map()
 
         if event.key() == Qt.Key_PageDown:
             if spn[0] + 0.003 < 0.05100000000000001:
                 spn[0] += 0.003
+            self.update_map()
 
 
 if __name__ == "__main__":
-    import sys
 
     app = QtWidgets.QApplication(sys.argv)
     Form = QtWidgets.QMainWindow()
