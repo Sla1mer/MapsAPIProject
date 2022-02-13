@@ -15,7 +15,4 @@ def get_description(name):
 
 
 
-a = get_description('калининград карамзина 38 88 ')
-
-print(a)
 # python3 get_description_by_name.py

@@ -94,13 +94,11 @@ class MapWindow(QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def find_obj(self, name):
-        global coord, all_pt
+        global all_pt, coord
         try:
             coord = get_coord(name)
-            if coord not in all_pt:
-                all_pt.append(coord)
             self.set_info(self.lineEdit.text())
-            self.add_pt()
+            self.add_pt(coord)
             self.update_map()
         except KeyError:
             pass
@@ -108,21 +106,16 @@ class MapWindow(QMainWindow):
     def set_info(self, name):
         self.textEdit.setText(get_description(name))
 
-    def add_pt(self):
+    def add_pt(self, pt):
         global pt_query, all_pt
-        temp = []
-        for i in all_pt:
-            temp.append(f'{i[0]},{i[1]}')
-        pt_query = '~'.join(temp)
+        all_pt.append(f'{pt[0]},{pt[1]}')
+        pt_query = '~'.join(all_pt)
 
     def del_last_pt(self):
         global all_pt
         self.lineEdit.clear()
         try:
             del all_pt[-1]
-            print(all_pt)
-            print(pt_query)
-            self.add_pt()
             self.update_map()
             self.textEdit.clear()
         except IndexError:
@@ -153,7 +146,6 @@ class MapWindow(QMainWindow):
             self.textEdit.clearFocus()
 
     def update_map(self):
-        print(pt_query)
         self.map_image.setPixmap(QPixmap.fromImage(ImageQt.ImageQt(Image.open(BytesIO(
             get_map_image(f'l={globality_mode}', f'll={coord[0]},{coord[1]}', f'spn={spn[0]},{spn[0]}', f'pt={pt_query}'))))))
 

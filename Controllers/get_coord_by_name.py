@@ -8,5 +8,4 @@ def get_coord(name):
     json_coord_respone = coord_respone.json()
     answ = json_coord_respone["response"]["GeoObjectCollection"]["featureMember"] \
         [0]["GeoObject"]["Point"]["pos"]
-    print(request_to_get_coord)
     return list(answ.split())
