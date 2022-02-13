@@ -129,7 +129,7 @@ class MapWindow(QMainWindow):
             self.set_info(self.lineEdit.text())
             self.add_pt(coord)
             self.update_map()
-        except KeyError:
+        except Exception:
             pass
 
     def set_info(self, name):
@@ -158,6 +158,7 @@ class MapWindow(QMainWindow):
             self.add_pt()
             self.update_map()
             self.textEdit.clear()
+            self.checkBox.setCheckState(0)
         except IndexError:
             pass
 
