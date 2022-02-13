@@ -5,10 +5,11 @@ from PIL import ImageQt, Image
 from Controllers.get_map_img import get_map_image
 from PyQt5.QtCore import Qt
 import sys
+from Controllers.get_zipcode import get_zipcode
 from Controllers.get_description_by_name import get_description
 from Controllers.get_coord_by_name import get_coord
 from PyQt5 import QtCore, QtMultimedia
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMessageBox
 from Controllers.mapapi_PG import show_map
 from Models.Variables import coord, spn
 globality_mode = 'map'
@@ -79,6 +80,7 @@ class MapWindow(QMainWindow):
         self.checkBox = QtWidgets.QCheckBox(self.centralwidget)
         self.checkBox.setGeometry(QtCore.QRect(950, 360, 87, 20))
         self.checkBox.setObjectName("checkBox")
+        self.checkBox.stateChanged.connect(lambda: self.change_zip_code())
 
         self.find_button = QtWidgets.QPushButton(self.centralwidget)
         self.find_button.setGeometry(QtCore.QRect(890, 150, 131, 61))
@@ -92,6 +94,33 @@ class MapWindow(QMainWindow):
 
         self.retranslateUi(self)
         QtCore.QMetaObject.connectSlotsByName(self)
+
+    def change_zip_code(self):
+        try:
+            text_copy = self.textEdit.toPlainText()
+            if text_copy != '':
+                if self.checkBox.checkState() == 2:
+                    ii = get_coord(self.lineEdit.text().split(','))
+                    try:
+                        self.textEdit.append(f"почтовый индекс: {get_zipcode(f'{ii[0]},{ii[1]}')}")
+                    except KeyError:
+                        msg = QMessageBox()
+                        msg.setText("Спасибо папаша за этот апи 21 века черного цвета. Индекс не получишь) в апи его просто нету. "
+                                    "Разработчик не достанет его из неоткуда, если думаешь что мы криворукие то проверь: Калининград гайдара 6")
+                        msg.setWindowTitle("Ошибка")
+                        msg.exec()
+                elif self.checkBox.checkState() == 0:
+                    try:
+                        print(text_copy)
+                        self.textEdit.clear()
+                        self.set_info(self.lineEdit.text())
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+
+
 
     def find_obj(self, name):
         global all_pt, coord
