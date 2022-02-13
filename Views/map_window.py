@@ -106,20 +106,27 @@ class MapWindow(QMainWindow):
     def set_info(self, name):
         self.textEdit.setText(get_description(name))
 
-    def add_pt(self, pt):
+    def add_pt(self, pt=None):
         global pt_query, all_pt
-        all_pt.append(f'{pt[0]},{pt[1]}')
-        pt_query = '~'.join(all_pt)
+        if pt is None:
+            temp = []
+            for i in all_pt:
+                ii = i.split(',')
+                temp.append(f'{ii[0]},{ii[1]}')
+            print(f'temp is {temp}')
+            pt_query = '~'.join(temp)
+        else:
+            all_pt.append(f'{pt[0]},{pt[1]}')
+            pt_query = '~'.join(all_pt)
 
     def del_last_pt(self):
         global all_pt, pt_query
         self.lineEdit.clear()
         try:
+            print(all_pt)
+            print('-------')
             del all_pt[-1]
-            temp = []
-            for i in all_pt:
-                temp.append(f'{i[0]},{i[1]}')
-            pt_query = '~'.join(temp)
+            self.add_pt()
             self.update_map()
             self.textEdit.clear()
         except IndexError:
