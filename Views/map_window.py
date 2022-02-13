@@ -112,10 +112,14 @@ class MapWindow(QMainWindow):
         pt_query = '~'.join(all_pt)
 
     def del_last_pt(self):
-        global all_pt
+        global all_pt, pt_query
         self.lineEdit.clear()
         try:
             del all_pt[-1]
+            temp = []
+            for i in all_pt:
+                temp.append(f'{i[0]},{i[1]}')
+            pt_query = '~'.join(temp)
             self.update_map()
             self.textEdit.clear()
         except IndexError:
