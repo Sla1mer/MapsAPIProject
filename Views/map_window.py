@@ -5,6 +5,7 @@ from PIL import ImageQt, Image
 from Controllers.get_map_img import get_map_image
 from PyQt5.QtCore import Qt
 import sys
+from Controllers.get_description_by_name import get_description
 from Controllers.get_coord_by_name import get_coord
 from PyQt5 import QtCore, QtMultimedia
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
@@ -64,6 +65,7 @@ class MapWindow(QMainWindow):
 
         self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
         self.textEdit.setGeometry(QtCore.QRect(740, 230, 221, 111))
+        self.textEdit.setReadOnly(True)
         self.textEdit.setObjectName("textEdit")
 
         self.label = QtWidgets.QLabel(self.centralwidget)
@@ -97,10 +99,14 @@ class MapWindow(QMainWindow):
             coord = get_coord(name)
             if coord not in all_pt:
                 all_pt.append(coord)
+            self.set_info(self.lineEdit.text())
             self.add_pt()
             self.update_map()
         except KeyError:
             pass
+
+    def set_info(self, name):
+        self.textEdit.setText(get_description(name))
 
     def add_pt(self):
         global pt_query, all_pt
@@ -118,6 +124,7 @@ class MapWindow(QMainWindow):
             print(pt_query)
             self.add_pt()
             self.update_map()
+            self.textEdit.clear()
         except IndexError:
             pass
 
