@@ -60,6 +60,7 @@ class MapWindow(QMainWindow):
         self.clear_button = QtWidgets.QPushButton(self.centralwidget)
         self.clear_button.setGeometry(QtCore.QRect(740, 150, 131, 61))
         self.clear_button.setObjectName("clear_button")
+        self.clear_button.clicked.connect(lambda: self.del_last_pt())
 
         self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
         self.textEdit.setGeometry(QtCore.QRect(740, 230, 221, 111))
@@ -92,11 +93,14 @@ class MapWindow(QMainWindow):
 
     def find_obj(self, name):
         global coord, all_pt
-        coord = get_coord(name)
-        if coord not in all_pt:
-            all_pt.append(coord)
-        self.add_pt()
-        self.update_map()
+        try:
+            coord = get_coord(name)
+            if coord not in all_pt:
+                all_pt.append(coord)
+            self.add_pt()
+            self.update_map()
+        except KeyError:
+            pass
 
     def add_pt(self):
         global pt_query, all_pt
@@ -105,12 +109,17 @@ class MapWindow(QMainWindow):
             temp.append(f'{i[0]},{i[1]}')
         pt_query = '~'.join(temp)
 
-        # for index, i in enumerate(all_pt):
-        #     if index == 0:
-        #         pt_query += f"{','.join(i)}"
-        #     else:
-        #         pt_query += f"~{','.join(i)}"
-        # print(all_pt)
+    def del_last_pt(self):
+        global all_pt
+        self.lineEdit.clear()
+        try:
+            del all_pt[-1]
+            print(all_pt)
+            print(pt_query)
+            self.add_pt()
+            self.update_map()
+        except IndexError:
+            pass
 
     def change_mode(self, mode):
         global globality_mode
