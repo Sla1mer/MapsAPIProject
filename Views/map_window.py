@@ -119,15 +119,13 @@ class MapWindow(QMainWindow):
         except Exception:
             pass
 
-
-
-
     def find_obj(self, name):
         global all_pt, coord
         try:
             coord = get_coord(name)
             self.set_info(self.lineEdit.text())
             self.add_pt(coord)
+            self.checkBox.setCheckState(0)
             self.update_map()
         except Exception:
             pass
